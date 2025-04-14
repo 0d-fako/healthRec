@@ -1,23 +1,20 @@
-import bcrypt from "bcrypt";
+import mongoose, { Schema, Document } from 'mongoose';
+import { UserRole, Gender } from './UserEnums';
 
-export abstract class User {
-    id: string;
-    name: string;
-    email: string;
-    password: string;
-  
-    constructor(id: string, name: string, email: string, password: string) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = this.hashPassword(password);
-    }
-
-    private hashPassword(password: string): string {
-        return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
-    }
-
-    checkPassword(password: string): boolean {
-        return bcrypt.compareSync(password, this.password);
-    }
+export interface IUser extends Document {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  gender: Gender;
 }
+
+const UserSchema = new Schema<IUser>({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, required: true, enum: Object.values(UserRole) },
+  gender: { type: String, required: true, enum: Object.values(Gender) },
+});
+
+export const UserModel = mongoose.model<IUser>('User', UserSchema);
